@@ -10,12 +10,12 @@ var flagN int
 
 func reader(ch <-chan int) {
 	for value := range ch {
-		fmt.Printf("Recived %d\n", value)
+		fmt.Printf("Recived %d from %v\n", value, flagN)
 	}
 }
 
 func writer(ch chan<- int) {
-	for i := 0; i < flagN; i++ {
+	for i := 1; i <= flagN; i++ {
 		ch <- i
 		time.Sleep(time.Second)
 	}
