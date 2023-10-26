@@ -2,36 +2,52 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 )
 
-var array = []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+var limitValue = 100
+
+func generateSlice() []int {
+	slice := make([]int, rand.Intn(limitValue))
+
+	for k, _ := range slice {
+		slice[k] = rand.Intn(limitValue)
+	}
+
+	return slice
+}
 
 func main() {
-	channelIn := make(chan int)
-	channelOut := make(chan int)
+	slice := generateSlice()
+
+	channelIn := make(chan int, len(slice)/2)
+	channelOut := make(chan int, len(slice)/2)
 
 	//go func writer
-	go func(chan<- int) {
-		for _, val := range array {
+	go func(channelIn chan<- int) {
+		defer close(channelIn)
+
+		for _, val := range slice {
 			channelIn <- val
 
 			//fmt.Printf("Go_func:\"Writer\" send %d\n", val)
 		}
-		defer close(channelIn)
 	}(channelIn)
 
 	//go func double
-	go func(<-chan int, chan<- int) {
+	go func(channelIn <-chan int, channelOut chan<- int) {
+		defer close(channelOut)
+
 		for val := range channelIn {
 			channelOut <- val * val
 
 			//fmt.Printf("Go_func:\"Double\" send %d\n", val*val)
 		}
-
-		defer close(channelOut)
 	}(channelIn, channelOut)
 
 	for val := range channelOut {
 		fmt.Printf("Received %d from %T\n", val, channelOut)
 	}
 }
+
+//размер буффера и нужен ли он?
