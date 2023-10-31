@@ -49,5 +49,3 @@ func main() {
 		fmt.Printf("Received %d from %T\n", val, channelOut)
 	}
 }
-
-//размер буффера и нужен ли он?

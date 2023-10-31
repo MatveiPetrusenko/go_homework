@@ -60,24 +60,3 @@ func worker(id int, mainChannel <-chan string, wg *sync.WaitGroup) {
 		fmt.Printf("Go_worker %d: Received %s\n", id, data)
 	}
 }
-
-//todo to ask:)
-//Порядок обьявления сигнала и контекста
-//А если одинаковые данные для всех воркеров? В каких случаях, пути решения
-
-//Заполнять буфер одинаковыми значения, а затем читать?
-/*go func() {
-	for {
-		select {
-		case <-ctx.Done():
-			close(mainChannel)
-			return
-		default:
-			data := fmt.Sprintf("Data %d", rand.Intn(limitValue))
-
-			for i := 0; i < nWorkers; i++{
-				mainChannel <- data
-			}
-		}
-	}
-}()*/
