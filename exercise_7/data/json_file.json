@@ -1,0 +1,13 @@
+{
+  "id" : "b33dc8e4-f1ed-436d-b570-96ca10b4dd36",
+  "latitude": 83.231,
+  "longitude" : 85.232123,
+  "tags": {
+    "tagName1" : 123,
+    "tagName2" : "test",
+    "tagName3" : 123.2323,
+    "tagName4" : true,
+    "tagName5" : "2023-02-01 12:23:12",
+    "tagName1" : 456
+  }
+}
