@@ -5,7 +5,7 @@ import (
 	"math/rand"
 )
 
-var limitValue = 100
+const limitValue = 100
 
 func generateSlice() []int {
 	slice := make([]int, rand.Intn(limitValue))
@@ -20,8 +20,8 @@ func generateSlice() []int {
 func main() {
 	slice := generateSlice()
 
-	channelIn := make(chan int, len(slice)/2)
-	channelOut := make(chan int, len(slice)/2)
+	channelIn := make(chan int, limitValue)
+	channelOut := make(chan int, limitValue)
 
 	//go func writer
 	go func(channelIn chan<- int) {
