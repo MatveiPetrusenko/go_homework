@@ -5,25 +5,21 @@ import (
 	"flag"
 	"fmt"
 	"math/rand"
-	"os"
 	"os/signal"
 	"sync"
 	"syscall"
 )
 
-var nWorkers int
-var limitValue = 100
+const limitValue = 100
 
 func main() {
-	flag.IntVar(&nWorkers, "nWorkers", 0, "An N workers")
+	var nWorkers int
+
+	flag.IntVar(&nWorkers, "nWorkers", 1, "An N workers")
 	flag.Parse()
 
 	mainChannel := make(chan string, nWorkers)
 	var wg sync.WaitGroup
-
-	//create signal channel + catcher for syscall
-	signals := make(chan os.Signal, 1)
-	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
 
 	//create context which listening syscall + defer for out/stop from context
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT)
@@ -49,7 +45,6 @@ func main() {
 		}
 	}()
 
-	<-signals
 	wg.Wait()
 }
 
