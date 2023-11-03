@@ -16,19 +16,24 @@ func or(channels ...<-chan interface{}) <-chan interface{} {
 		go func(c <-chan interface{}) {
 			defer wg.Done()
 
+			/*			for _ = range c {
+						}
+						single <- struct{}{}*/
+
 			for {
 				val, ok := <-c
-				if !ok {
-					return
+				if ok {
+					continue
 				}
 				single <- val
+				break
 			}
 		}(ch)
 	}
 
 	go func() {
-		close(single)
 		wg.Wait()
+		close(single)
 	}()
 
 	return single
@@ -45,13 +50,14 @@ func main() {
 	}
 
 	start := time.Now()
+
 	<-or(
 		sig(2*time.Hour),
 		sig(5*time.Minute),
-		sig(1*time.Second),
+		sig(3*time.Second),
 		sig(1*time.Hour),
 		sig(1*time.Minute),
 	)
 
-	fmt.Printf("fone after %v", time.Since(start))
+	fmt.Printf("fone after %s\n", time.Since(start))
 }
