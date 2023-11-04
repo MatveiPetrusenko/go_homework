@@ -1,14 +1,22 @@
 package main
 
 import (
+	"cmp"
 	"encoding/csv"
 	"fmt"
+	"log"
 	"os"
+	"slices"
 	"strconv"
+	"strings"
 )
 
+const formatLineCSV = 2
+const divisorValue = 1000
+const defaultCurrency = "USD"
+
 type Money struct {
-	Value    float64
+	Value    int
 	Currency Currency
 }
 
@@ -16,27 +24,30 @@ type Currency string
 
 var ExchangeRates = make(map[Currency]Money)
 
-var formatLineCSV = 2
-
-func (m Money) Equals(other Money) string {
+func (m Money) Equals(other Money) int {
 	if m.Currency == other.Currency {
-		if m.Value > other.Value {
-			return ">"
-		} else if m.Value < other.Value {
-			return "<"
-		} else {
-			return "="
-		}
+		var result int
+		compared := []int{m.Value, other.Value}
+
+		slices.SortFunc(compared, func(a, b int) int {
+			result = cmp.Compare(a, b)
+			return result
+		})
+
+		return result
 	}
 
+	var result int
 	convertedValue := other.ConvertTo(m.Currency)
-	if m.Value > convertedValue.Value {
-		return ">"
-	} else if m.Value < convertedValue.Value {
-		return "<"
-	} else {
-		return "="
-	}
+	compared := []int{m.Value, convertedValue.Value}
+
+	slices.SortFunc(compared, func(a, b int) int {
+		result = cmp.Compare(a, b)
+		return result
+	})
+
+	return result
+
 }
 
 func (m Money) Add(other Money) Money {
@@ -56,11 +67,11 @@ func (m Money) Subtract(other Money) Money {
 }
 
 func (m Money) ConvertTo(newCurrency Currency) Money {
-	if m.Currency != newCurrency && newCurrency == "USD" {
-		convertedValue := m.Value * ExchangeRates[m.Currency].Value
+	if m.Currency != newCurrency && newCurrency == defaultCurrency {
+		convertedValue := (m.Value * ExchangeRates[m.Currency].Value) / divisorValue
 		return Money{Value: convertedValue, Currency: newCurrency}
-	} else if m.Currency != newCurrency && newCurrency != "USD" {
-		convertedValue := (m.Value / ExchangeRates[m.Currency].Value) * ExchangeRates[newCurrency].Value
+	} else if m.Currency != newCurrency && newCurrency != defaultCurrency {
+		convertedValue := ((m.Value / ExchangeRates[m.Currency].Value) * ExchangeRates[newCurrency].Value) / divisorValue
 		return Money{Value: convertedValue, Currency: newCurrency}
 	}
 	return m
@@ -81,14 +92,15 @@ func loadFile(filename string) error {
 
 	for i, line := range records {
 		if len(line) != formatLineCSV {
-			fmt.Println("Error Line", i, line)
+			fmt.Println("line skipped", i, line)
 			continue
 		}
 
 		currency := Currency(line[0])
-		rate, err := strconv.ParseFloat(line[1], 64)
+
+		rate, err := strconv.Atoi(strings.Replace(line[1], ".", "", -1))
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("rate skipped", i, line)
 			continue
 		}
 
@@ -101,27 +113,7 @@ func loadFile(filename string) error {
 func main() {
 	err := loadFile("exchange_rates.csv")
 	if err != nil {
-		fmt.Println(err)
+		log.Printf("%v\n", err)
 		return
 	}
-
-	money1 := Money{Value: 200.0, Currency: "RUR"}
-	money2 := Money{Value: 2.0, Currency: "EUR"}
-
-	//Equals
-	result := money1.Equals(money2)
-	fmt.Printf("%v %v %v\n", money1.Currency, result, money2.Currency)
-
-	//Add
-	total := money1.Add(money2)
-	fmt.Println(total)
-
-	//Subtract
-	diff := money1.Subtract(money2)
-	fmt.Println(diff)
-
-	//ConvertTo
-	convertedValue := money1.ConvertTo("EUR")
-	fmt.Println(convertedValue)
-
 }
