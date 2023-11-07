@@ -7,17 +7,18 @@ import (
 )
 
 func main() {
-	cache := lruCache.NewLRUCache(1000, 1*time.Minute)
+	cache := lruCache.NewLRUCache(lruCache.WithCapacity(1000), lruCache.WithTTL(1*time.Minute), lruCache.WithOtherOption())
 
 	cache.Add("key1", "value1")
+
 	res, ok := cache.Get("key1")
-	fmt.Println(res, ok)
+	fmt.Printf("%v %t\n", res, ok)
 
 	res, notOk := cache.Get("key2")
-	fmt.Println(res, notOk)
+	fmt.Printf("%v %t\n", res, notOk)
 
 	time.Sleep(1 * time.Minute)
 
 	res, notOk = cache.Get("key1")
-	fmt.Println(res, notOk)
+	fmt.Printf("%v %t\n", res, notOk)
 }

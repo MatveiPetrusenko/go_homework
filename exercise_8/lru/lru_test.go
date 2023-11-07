@@ -6,18 +6,18 @@ import (
 )
 
 func TestLRUCache(t *testing.T) {
-	cache := NewLRUCache(2, 1*time.Minute)
+	cache := NewLRUCache(WithCapacity(2), WithTTL(1*time.Minute), WithOtherOption())
 
 	cache.Add("key1", "value1")
 	cache.Add("key2", "value2")
 
 	value, ok := cache.Get("key1")
-	if !ok || value != "value1" {
+	if value != "value1" || !ok {
 		t.Errorf("Expected key1 to be present in the cache")
 	}
 
 	value, ok = cache.Get("key2")
-	if !ok || value != "value2" {
+	if value != "value2" || !ok {
 		t.Errorf("Expected key2 to be present in the cache")
 	}
 
@@ -30,7 +30,7 @@ func TestLRUCache(t *testing.T) {
 }
 
 func BenchmarkAdd(b *testing.B) {
-	cache := NewLRUCache(1000, 0)
+	cache := NewLRUCache(WithCapacity(1000), WithTTL(0))
 
 	for i := 0; i < b.N; i++ {
 		cache.Add(i, i)
@@ -38,7 +38,8 @@ func BenchmarkAdd(b *testing.B) {
 }
 
 func BenchmarkGet(b *testing.B) {
-	cache := NewLRUCache(1000, 0)
+	cache := NewLRUCache(WithCapacity(1000), WithTTL(0))
+
 	for i := 0; i < 1000; i++ {
 		cache.Add(i, i)
 	}
