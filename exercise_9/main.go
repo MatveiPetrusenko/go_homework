@@ -2,42 +2,38 @@ package main
 
 import (
 	"fmt"
-	"unicode/utf8"
-)
-
-const (
-	left  = int32(40)
-	right = int32(41)
 )
 
 func isBracketValid(s string) bool {
-	if utf8.RuneCountInString(s) <= 1 {
+	if s[0] == ')' || s[0] == ']' || s[0] == '}' {
 		return false
 	}
 
-	var counter int
+	brackets := map[rune]rune{
+		')': '(',
+		']': '[',
+		'}': '{',
+	}
 
+	stack := make([]rune, 0, len(s))
 	for _, val := range s {
-		if counter == -1 {
-			return false
-		}
-
 		switch val {
-		case left:
-			counter++
-		case right:
-			counter--
+		case '(', '[', '{':
+			stack = append(stack, val)
+		case ')', ']', '}':
+			if len(stack) == 0 || stack[len(stack)-1] != brackets[val] {
+				return false
+			}
+
+			stack = stack[:len(stack)-1]
 		}
 	}
 
-	if counter == 0 {
-		return true
-	}
-
-	return false
+	return len(stack) == 0
 }
 
 func main() {
 	fmt.Printf("%t\n", isBracketValid("(())()")) //true
 	fmt.Printf("%t\n", isBracketValid("())("))   //false
+	fmt.Printf("%t\n", isBracketValid(")())("))  //false
 }
